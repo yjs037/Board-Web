@@ -1,4 +1,4 @@
-package com.board.controller;
+package com.board.persistence;
 
 import static org.junit.Assert.fail;
 
