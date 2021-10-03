@@ -4,7 +4,15 @@
 
 <select id = "getList" resultType = "com.board.domain.BoardVO">
 	<![CDATA[
-		SELECT bno, title, content, writer, reg_date, update_date FROM tbl_board where bno > 0;
+		SELECT bno, title, content, writer, reg_date, update_date FROM tbl_board where bno > 0
+	]]>
+</select>
+
+<select id = "getListWithPaging" resultType = "com.board.domain.BoardVO">
+	<![CDATA[
+	SELECT a.bno, title, content, writer, reg_date, update_date 
+	FROM (select bno from tbl_board order by bno desc limit #{page}, #{amount}) b
+	JOIN tbl_board a ON a.bno = b.bno;
 	]]>
 </select>
 
@@ -30,5 +38,9 @@
 	set title = #{title}, content = #{content}, writer = #{writer}, update_date = now() 
 	where bno = #{bno}
 </update>
+
+<select id = "getTotalCount" resultType = "int">
+	select count(*) from tbl_board where bno > 0
+</select>
 
 </mapper>

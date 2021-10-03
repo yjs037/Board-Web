@@ -15,6 +15,10 @@
 	<div class="card-body">
 				
 		<form role = "form" action = "/board/modify" method = "post">
+				
+			<input type = "hidden" name ="pageNum" value = "<c:out value = "${cri.pageNum}"/>">		
+			<input type = "hidden" name ="amount" value = "<c:out value = "${cri.amount}"/>">		
+		
 			<div class = "form-group">
 				<label>글번호</label>
 				<input class = "form-control" name = "bno" value = "<c:out value = "${board.bno}"/>" readonly = "readonly"/>
@@ -34,9 +38,7 @@
 				<label>작성자</label>
 				<input class = "form-control" name = "writer" value = "<c:out value = "${board.writer}"/>" readonly = "readonly"/>
 			</div>
-			
-
-							
+								
 			<button data-oper = 'modify' class = "btn btn-secondary btn-icon-split">수정</button>
 			<button data-oper = 'remove' class = "btn btn-danger btn-icon-split">삭제</button>
 			<button data-oper = 'list' class = "btn btn-primary btn-icon-split">목록</button>
@@ -61,11 +63,19 @@
 				formObj.attr("action", "/board/remove");
 			} else if (operation == 'list') {
 				formObj.attr("action", "/board/list").attr("method", "get");
+				
+				let pageNumTag = $("input[name='pageNum']").clone();
+				let amountTag = $("input[name='amount']").clone();
+				
 				formObj.empty();
+				formObj.append(pageNumTag);
+				formObj.append(amountTag);
 			}
 			formObj.submit();
 			
 		});
+		
+		
 	});
 </script>
 

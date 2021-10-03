@@ -38,6 +38,8 @@
 				<button data-oper = 'list' class = "btn btn-secondary btn-icon-split">목록</button>
 				
 				<form id = 'operForm' action = "/board/modify" method = "get">
+						<input type = "hidden" id = "pageNum" name = "pageNum" value = '<c:out value = "${cri.pageNum}"/>'>
+						<input type = "hidden" id = "amount" name = "amount" value = '<c:out value = "${cri.amount}"/>'>
 						<input type = "hidden" id = "bno" name = "bno" value = '<c:out value = "${board.bno}"/>'>
 				</form>
 		
