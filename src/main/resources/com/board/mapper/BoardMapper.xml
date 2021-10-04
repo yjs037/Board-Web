@@ -2,20 +2,42 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace = "com.board.mapper.BoardMapper">
 
-<select id = "getList" resultType = "com.board.domain.BoardVO">
-	<![CDATA[
-		SELECT bno, title, content, writer, reg_date, update_date FROM tbl_board where bno > 0
-	]]>
-</select>
+<!-- 검색 조건문  -->
+<sql id = "criteria">
+	<trim prefix = "WHERE (" suffix=")" prefixOverrides = "OR">
+		<foreach item = "type" collection = "typeArr"> 
+			<trim prefix = "OR">
+				<choose>
+					<when test = "type == 'T'.toString()">
+						title like CONCAT('%', #{keyword}, '%')
+					</when>
+					<when test = "type == 'C'.toString()">
+						content like CONCAT('%', #{keyword}, '%')
+					</when>
+					<when test = "type == 'W'.toString()">
+						writer like CONCAT('%', #{keyword}, '%')
+					</when>
+				</choose>
+			</trim>	
+		</foreach>
+	</trim>
+</sql>
 
+
+<!-- 게시판 리스트와 페이징 -->
 <select id = "getListWithPaging" resultType = "com.board.domain.BoardVO">
-	<![CDATA[
+
 	SELECT a.bno, title, content, writer, reg_date, update_date 
-	FROM (select bno from tbl_board order by bno desc limit #{page}, #{amount}) b
+		FROM (select bno from tbl_board
+		 <if test="keyword != null">
+       <include refid="criteria"></include>
+     </if>
+		order by bno desc limit #{page}, #{amount}) b
 	JOIN tbl_board a ON a.bno = b.bno;
-	]]>
+
 </select>
 
+<!-- 게시글 등록, bno값 얻어오기  -->
 <insert id = "insertSelectKey">
 	<selectKey keyProperty="bno" order = "AFTER" resultType = "long">
 		select last_insert_id();
@@ -25,22 +47,31 @@
 	values (#{bno}, #{title}, #{content}, #{writer})	
 </insert>
 
+<!-- 게시판 읽기  -->
 <select id = "read" resultType = "com.board.domain.BoardVO">
 	select * from tbl_board where bno = #{bno}
 </select>
 
+<!-- 게시글 삭제 -->
 <delete id="delete">
 	delete from tbl_board where bno = #{bno}
 </delete>
 
+<!-- 게시글 수정  -->
 <update id="update">
 	update tbl_board
 	set title = #{title}, content = #{content}, writer = #{writer}, update_date = now() 
 	where bno = #{bno}
 </update>
 
+<!-- 게시판 글 총 갯수 -->
 <select id = "getTotalCount" resultType = "int">
-	select count(*) from tbl_board where bno > 0
+	select count(*) from tbl_board 
+	
+	<if test="keyword != null">
+   <include refid="criteria"></include>
+  </if>    
+  
 </select>
 
 </mapper>

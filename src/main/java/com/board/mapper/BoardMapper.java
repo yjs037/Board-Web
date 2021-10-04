@@ -7,7 +7,7 @@ import com.board.domain.Criteria;
 
 public interface BoardMapper {
 	
-	public List<BoardVO> getList();
+	//public List<BoardVO> getList();
 	
 	public List<BoardVO> getListWithPaging(Criteria cri);
 	

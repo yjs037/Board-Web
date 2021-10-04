@@ -52,7 +52,7 @@
 					<c:forEach items = "${list}" var = "board">
 						<tr>
 							<td><c:out value = "${board.bno}" /></td>
-							<td><a class = "move" href = '<c:out value = "${board.bno }"/>'><c:out value = "${board.title}"/></a></td>
+							<td><a class = "read" href = '<c:out value = "${board.bno }"/>'><c:out value = "${board.title}"/></a></td>
 							<td><c:out value = "${board.writer}"/></td>
 							<td><fmt:formatDate pattern="yyyy-MM-dd" value ="${board.reg_date}"/></td>
 							<td><fmt:formatDate pattern="yyyy-MM-dd" value ="${board.update_date}"/></td>
@@ -60,9 +60,26 @@
 					</c:forEach>
 					</tbody>
 				</table>
+				
+				<form id = "searchForm" action = "/board/list" method = "get">
+					<select name = 'type'>
+						<option value = "" <c:out value = "${pageMaker.cri.type == null ? 'selected' : '' }"/>>--</option>
+						<option value = "T"<c:out value = "${pageMaker.cri.type eq 'T' ? 'selected' : '' }"/>>제목</option>
+						<option value = "C"<c:out value = "${pageMaker.cri.type eq 'C' ? 'selected' : '' }"/>>내용</option>
+						<option value = "W"<c:out value = "${pageMaker.cri.type eq 'W' ? 'selected' : '' }"/>>작성자</option>
+						<option value = "TC"<c:out value = "${pageMaker.cri.type eq 'TC' ? 'selected' : '' }"/>>제목 or 내용</option>
+						<option value = "TW"<c:out value = "${pageMaker.cri.type eq 'TW' ? 'selected' : '' }"/>>제목 or 작성자</option>
+						<option value = "TWC"<c:out value = "${pageMaker.cri.type eq 'TWC' ? 'selected' : '' }"/>>제목 or 내용 or 작성자</option>
+					</select>
+					
+					<!-- 검색할때 keyowrd, pageNum, amount값을 같이 전달  -->
+					<input type = "hidden" name = "pageNum" value = '<c:out value = "${pageMaker.cri.pageNum}"/>'/>
+					<input type = "hidden" name = "amount" value = '<c:out value = "${pageMaker.cri.amount}"/>'/>
+					<input type = "text" name = "keyword" value = '<c:out value = "${pageMaker.cri.keyword }"/>'/>
+					<button class = 'btn btn-secondary'>Search</button>
+				</form>
 						
-				<!-- Paging  -->
-							
+				<!-- Paging  -->		
 					<div class="dataTables_paginate paging_simple_numbers" id="dataTable_paginate">
 						<ul class="pagination">
 						
@@ -73,7 +90,7 @@
 							</c:if>
 							
 							<c:forEach var = "num" begin = "${pageMaker.startPage }" end ="${pageMaker.endPage }">
-								<li class = "paginate_button page-item ${pageMaker.cri.pageNum == num ? "active":"" }">
+								<li class = "paginate_button page-item ${pageMaker.cri.pageNum == num ? 'active' : ''}">
 									<a href = "${num }" aria-controls = "dataTable" data-dt-idx = "${num}" tabindex="0" class="page-link">${num}</a>
 								</li>
 							</c:forEach>
@@ -107,9 +124,12 @@
 		</div> <!-- end table-responsive -->
 	</div>
 </div>
+<!-- 페이지 이동시 keyowrd, type, pageNum, amount값을 같이 전달 -->
 <form id ="actionForm" action = "/board/list" method ="get">
 	<input type = "hidden" name = "pageNum" value = "<c:out value = "${pageMaker.cri.pageNum}"/>"/>
 	<input type = "hidden" name = "amount" value = "<c:out value = "${pageMaker.cri.amount}"/>"/>
+	<input type = "hidden" name = "keyword" value = '<c:out value = "${pageMaker.cri.keyword }"/>'/>
+	<input type = "hidden" name = "type" value = '<c:out value = "${pageMaker.cri.type }"/>'/>
 </form>
 
 <script type = "text/javascript">
@@ -147,12 +167,34 @@
 			
 		});
 		
-		$(".move").on("click", function(e){
+		//게시물 읽기버튼
+		$(".read").on("click", function(e){
 			
 			e.preventDefault();
 			actionForm.append("<input type='hidden' name='bno' value='"+$(this).attr("href")+"'>");
 			actionForm.attr("action", "/board/get");
 			actionForm.submit();
+		});
+		
+		let searchForm = $("#searchForm");
+		
+		// 검색버튼 이벤트 처리
+		$("#searchForm button").on("click", function(e){
+			
+			if(!searchForm.find("option:selected").val()){
+				alert("검색조건을 선택 해주세요.");
+				return false;
+			};
+			
+			if(!searchForm.find("input[name='keyword']").val()){
+				alert("검색어를 입력 해주세요.");
+				return false;
+			};	
+		
+			searchFrom.find("input[name='pageNum']").val("1");
+			e.preventDefault();
+			
+			searchForm.submit();
 		});
 		
 	});
