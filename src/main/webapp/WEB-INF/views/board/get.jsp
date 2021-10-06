@@ -48,14 +48,15 @@
 	</div>
 	
 </div><!-- end card shadow mb-4 -->
+<script type = "text/javascript" src = "/resources/js/reply.js"></script>
 <script type = "text/javascript">
 $(document).ready(function(){
 	
 	let operForm = $("#operForm");
 	
 	$("button[data-oper = 'modify']").on("click", function(e){
-		operForm.attr("action", "/board/modify").submit();
 		
+		operForm.attr("action", "/board/modify").submit();
 	});
 	
 	$("button[data-oper = 'list']").on("click", function(e){
@@ -63,11 +64,58 @@ $(document).ready(function(){
 		operForm.find("#bno").remove();
 		operForm.attr("action", "/board/list")
 		operForm.submit();
-		
 	});
+	
 });
-
-
+</script>
+<script type="text/javascript">
+$(document).ready(function(){
+	
+	console.log("===============");
+	console.log("JS TEST");
+	
+	let bnoValue = '<c:out value = "${board.bno}"/>';
+	
+	replyService.add({reply : "JS TEST", replyer : "tester", bno : bnoValue }, 
+		
+		function(result){
+			alert("RESULT : " + result);
+		});
+		
+	replyService.getList({bno:bnoValue, page:1 },
+		
+		function(list){
+			for(let i = 0, len = list.length||0; i < len; i++){
+				console.log(list[i]);
+			}
+		});	
+	
+	replyService.remove(24, function(count){
+		
+		console.log("count : " + count);
+		
+		if(count === "success") {
+			alert("Remove");
+		}
+	}, function(err){
+			alert("Error...");
+	});
+	
+	replyService.update({
+		rno : 22,
+		bno : bnoValue,
+		reply : "Modified Reply...."
+	}, function(result){
+		
+		alert("수정 완료...");		
+	});
+	
+	replyService.get(10, function(data){
+		console.log(data);
+	});
+		
+		
+});
 </script>
 
 
