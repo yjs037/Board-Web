@@ -6,25 +6,24 @@
  .chat {
  	list-style : none;
  	position : relative;
- 	left : -40px;
  	margin: 0px auto;
  }
 
  .pull-right {
-	  float : right;
-	 	text-align: right;
-	 	position : relative;
-	 	right : -40px;
+  float : right;
+ 	text-align: right;
+ 	position : relative;
+ 	left : -30px;
  }
  
  textarea.autosize {
-		min-height: 60px;
-		overflow: hidden; 
-		overflow-wrap: break-word;
-		resize : none;
-		border-radius: 6px;
-		border-color : rgba(0, 0, 0, 0.1);
-		padding: 16px 10px 10px 18px;
+	min-height: 60px;
+	overflow: hidden; 
+	overflow-wrap: break-word;
+	resize : none;
+	border-radius: 6px;
+	border-color : rgba(0, 0, 0, 0.1);
+	padding: 16px 10px 10px 18px;
  }
 
  textarea:focus {
@@ -37,35 +36,37 @@
  }
 
  .modReplyBtn, .removeReplyBtn {
-	  height : 15px;
-	 	float : right;
-	 	position : relative;
-	 	top : -40px;
-	 	right : -40px;
-	 	font-size : 10px;
-	 	line-height: 1.5px;
+  height : 15px;
+ 	float : right;
+ 	position : relative;
+ 	top : -40px;
+ 	right : 15px;
+ 	font-size : 10px;
+ 	line-height: 1.5px;
  }
  
-  .resetBtn, .modBtn {
-	 	float : right;
-	 	text-align: right;
-	 	position : relative;
-	 	top : -15px;
-	 	font-size : 13px;
-	 	color: #3a3b45;
-	  background-color: #f8f9fc;
-	  vertical-align: middle;
-	  border: 1px solid transparent;
-	  padding: .375rem .75rem;
-	  line-height: 1.5;
-	  border-radius: .35rem;
+ .resetBtn, .modBtn {
+ 	float : right;
+ 	text-align: right;
+ 	position : relative;
+ 	top : -15px;
+ 	font-size : 13px;
+ 	color: #3a3b45;
+  background-color: #f8f9fc;
+  vertical-align: middle;
+  border: 1px solid transparent;
+  padding: .375rem .75rem;
+  line-height: 1.5;
+  border-radius: .35rem;
  }
  
  #rHeight {
  	height: 120px;
- 
  }
- 
+
+ .pagination {
+	justify-content: flex-end;
+ }
 
  </style>
 
@@ -136,6 +137,10 @@
 			</li>
 		</ul>
 		
+		<div class="dataTables_paginate paging_simple_numbers chat-footer" id ="dataTable_paginate">
+		
+		</div>
+		
 		<div id = "replyBox" class = "reply-insert card shadow mb-4 replyValue">
 			<textarea name = "reply" class = "autosize" rows = "1" onkeydown = "resize(this)" onkeyup="resize(this)" placeholder="댓글을 남겨보세요"></textarea>		
 		</div>
@@ -173,15 +178,26 @@ $(document).ready(function(){
 	//댓글리스트 출력
 	function showList(page) {
 		
-		replyService.getList({bno:bnoValue, page:page||1}, function(list) {
-			let str = "";
+		console.log("show List " + page);
+		
+		replyService.getList({bno:bnoValue, page:page||1}, function(replyCnt, list) {
 			
-			//댓글 없으면 빈칸
-			if(list == null || list.length == 0){
-				replyUL.html("");
-				
+			console.log("Cnt : " + replyCnt);
+			console.log("list : " + list);
+			console.log(list);
+			
+			if(page == -1){
+				pageNum = Math.ceil(replyCnt/10.0);
+				showList(pageNum);				
 				return;
 			}
+
+			let str = "";
+			
+			if(list == null || list.length == 0) {
+				return;
+			}
+			
 			
 			//list만큼 출력
 			for (let i =0, len = list.length || 0; i < len; i++) {
@@ -193,9 +209,67 @@ $(document).ready(function(){
 				str +="<button type = 'button' class = 'btn btn-light modReplyBtn'><small>수정</small></button>";
 				str +="<hr></div></li>";
 			}//for end
+			
 			replyUL.html(str);
+			showReplyPage(replyCnt);
 		});// getList end
 	}// showList end
+	
+	let pageNum = 1;
+	let replyPageFooter = $(".chat-footer");
+	
+	//댓글 페이징
+	function showReplyPage(replyCnt) {
+		
+		let endNum = Math.ceil(pageNum / 10.0) * 10.0;
+		let startNum = endNum - 9;
+		
+		let prev = startNum != 1;
+		let next = false;
+		
+		if(endNum * 10 >= replyCnt) {
+			endNum = Math.ceil(replyCnt/10.0);
+		}
+		
+		if(endNum * 10 < replyCnt) {
+			next = true;
+		}
+		
+		let str = "<ul class='pagination'>";
+		
+		if(prev) {
+			str += "<li class = 'paginate_button page-item previous'><a class = 'page-link' href = '"+(startNum -1)+"'>Previous</a></li>";
+		}
+		
+		for (let i = startNum; i <= endNum; i++) {
+			let active = pageNum == i? "active" : "";
+			
+			str += "<li class = 'paginate_button page-item previous "+active+"'><a class = 'page-link' href = '"+i+"'>"+i+"</a></li>";
+		}
+		
+		if(next) {
+			str += "<li class = 'paginate_button page-item next'><a class='page-link' href='"+(endNum +1)+"'>Next</a></li>";
+		}
+		
+		str += "</ul>";
+		
+		console.log(str);
+		replyPageFooter.html(str);
+		
+	}
+	
+	replyPageFooter.on("click", "li a", function(e){
+		e.preventDefault();
+		console.log("page click");
+		
+		let targetPageNum = $(this).attr("href");
+		console.log("targetPageNum : " + targetPageNum);
+		
+		pageNum = targetPageNum;
+		
+		showList(pageNum);
+	});
+	
 	
 	//댓글등록
 	addReplyBtn.on("click", function(e){
@@ -206,13 +280,12 @@ $(document).ready(function(){
 				reply : InputReply.val(),
 				replyer : InputReplyer.val(),
 				bno : bnoValue				
-		};
-			
-				
+		};				
+		
 		replyService.add(reply, function(result){
 			
 			box.find('textarea').val("");
-			showList(1);
+			showList(-1);
 
 		});		
 		
@@ -264,7 +337,7 @@ $(document).ready(function(){
 		let reply = { rno :rno,	reply : content };
 		
 		replyService.update(reply, function(result){
-			showList(1);
+			showList(pageNum);
 			
 		});
 		
@@ -273,7 +346,7 @@ $(document).ready(function(){
 	//댓글수정취소
 	$(document).on('click', '.resetBtn', function(){
 		
-		showList(1);
+		showList(pageNum);
 		
 	});
 	
@@ -284,7 +357,7 @@ $(document).ready(function(){
 		
 		replyService.remove(rno, function(result){
 			
-			showList(1);
+			showList(pageNum);
 			
 		});
 		
