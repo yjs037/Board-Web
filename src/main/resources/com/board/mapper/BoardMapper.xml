@@ -27,7 +27,7 @@
 <!-- 게시판 리스트와 페이징 -->
 <select id = "getListWithPaging" resultType = "com.board.domain.BoardVO">
 
-	SELECT a.bno, title, content, writer, reg_date, update_date 
+	SELECT a.bno, title, content, writer, reg_date, update_date, replyCnt 
 		FROM (select bno from tbl_board
 		 <if test="keyword != null">
        <include refid="criteria"></include>
@@ -74,4 +74,13 @@
   
 </select>
 
+<update id = "updateReplyCnt">
+	update tbl_board set replyCnt = replyCnt + #{cnt} where bno = #{bno}
+</update>
+
 </mapper>
+
+
+
+
+
