@@ -14,9 +14,7 @@
 	</div>
 	
 	<div class="card-body">
-	
-
-			
+		
 				<form role = "form" action = "/board/register" method = "post">
 					<div class = "form-group">
 						<label>제목</label>
@@ -27,12 +25,12 @@
 						<label>내용</label>
 						<textarea class = "form-control" rows = "6" name = "content"></textarea>
 					</div>
-
-                                       
+                                  
 					<div class = "form-group">
 						<label>작성자</label>
 						<input class = "form-control" name = "writer"/>
 					</div>
+						
 					<button type = "submit" class = "btn btn-secondary btn-icon-split">글쓰기</button>
 					<button type = "button" class = "btn btn-secondary btn-icon-split" onclick ="location.href='/board/list'">취소</button>
 				</form>

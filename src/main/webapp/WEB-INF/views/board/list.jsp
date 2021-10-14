@@ -15,6 +15,31 @@
 		width : 100%; 
 		border-spacing: 0px;
 	}
+	
+	.boardBno {
+		width : 120px;
+	}
+	
+	thead, tfoot, tbody {
+		text-align: center;
+	}
+	
+	.regDate, .updateDate {
+		width : 170px;
+	}
+	 
+	.viewCnt {
+		width : 110px;
+	}
+	
+	.writer {
+		width : 150px;
+	}
+	
+	.title {
+		width : 500px;
+	}
+	
 
 </style>
 <!-- Page Heading -->
@@ -31,23 +56,15 @@
 				<table class="table table-bordered" id="dataTable">
 					<thead>
 						<tr>
-							<th>#글번호</th>
-							<th>제목</th>
-							<th>작성자</th>
-							<th>작성일</th>
-							<th>수정일</th>
+							<th class = "boardBno">#글번호</th>
+							<th class = "title">제목</th>
+							<th class = "writer">작성자</th>
+							<th class = "regDate">작성일</th>
+							<th class = "updateDate">수정일</th> 
+							<th class = "viewCnt">조회수</th> 
 						</tr>
 					</thead>
-					<tfoot>
-						<tr>
-							<th>#글번호</th>
-							<th>제목</th>
-							<th>작성자</th>
-							
-							<th>작성일</th>
-							<th>수정일</th>
-						</tr>
-					</tfoot>
+					
 					<tbody>
 					<c:forEach items = "${list}" var = "board">
 						<tr>
@@ -60,9 +77,22 @@
 							<td><c:out value = "${board.writer}"/></td>
 							<td><fmt:formatDate pattern="yyyy-MM-dd" value ="${board.reg_date}"/></td>
 							<td><fmt:formatDate pattern="yyyy-MM-dd" value ="${board.update_date}"/></td>
+							<td>0</td>
 						</tr>
 					</c:forEach>
-					</tbody>
+					</tbody>			
+					
+					<tfoot>
+						<tr>
+							<th class = "boardBno">#글번호</th>
+							<th class = "title">제목</th>
+							<th class = "writer">작성자</th>
+							<th class = "regDate">작성일</th>
+							<th class = "updateDate">수정일</th>
+							<th class = "viewCnt">조회수</th>
+						</tr>
+					</tfoot>
+
 				</table>
 				
 				<form id = "searchForm" action = "/board/list" method = "get">

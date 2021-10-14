@@ -1,7 +1,5 @@
 package com.board.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +27,7 @@ public class ReplyServiceImpl implements ReplyService {
 	@Override
 	public int register(ReplyVO vo) {
 		
-		log.info("resgister...." + vo);
+		log.info("register...." + vo);
 		
 		boardMapper.updateReplyCnt(vo.getBno(), 1);
 		
@@ -64,13 +62,13 @@ public class ReplyServiceImpl implements ReplyService {
 		return mapper.delete(rno);
 	}
 
-	@Override
-	public List<ReplyVO> getList(Criteria cri, Long rno) {
-
-		log.info("get Reply List " + rno);
-
-		return mapper.getListWithPaging(cri, rno);
-	}
+	/*
+	 * @Override public List<ReplyVO> getList(Criteria cri, Long rno) {
+	 * 
+	 * log.info("get Reply List " + rno);
+	 * 
+	 * return mapper.getListWithPaging(cri, rno); }
+	 */
 
 	@Override
 	public ReplyPageDTO getListPage(Criteria cri, Long rno) {
