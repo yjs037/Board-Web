@@ -68,7 +68,7 @@
  .pagination {
 	justify-content: flex-end;
  }
-
+ 
  </style>
 
 <!-- Page Heading -->
@@ -165,7 +165,104 @@
 $(document).ready(function(){
 	
 	let bnoValue = '<c:out value = "${board.bno}"/>';
-	let replyUL = $(".chat");
+	let replyUL = $(".chat");	
+	
+	showList(1);
+	
+	//댓글리스트 출력
+	function showList(page) {
+		
+		console.log("show List " + page);
+		
+		replyService.getList({bno : bnoValue, page : page || 1 }, 
+				
+			function(replyCnt, list) {
+					
+			if(page == -1){
+				pageNum = Math.ceil(replyCnt/10.0);
+				showList(pageNum);				
+				return;
+			}
+
+			let str = "";
+			
+			if(list == null || list.length == 0) {
+				return;
+			}			
+			
+			//list만큼 출력
+			for (let i = 0, len = list.length || 0; i < len; i++) {
+								
+				str +="<li id = 'replyList"+list[i].rno+"' data-rno = '"+list[i].rno+"'>";
+				str +=	"<div id = 'header"+list[i].rno+"' data-replyer = '"+list[i].replyer+"'>";
+				str +=		"<strong>"+list[i].replyer+"</strong>";
+				str +=	"<small id = 'dateValue' class ='pull-right'>"+replyService.displayTime(list[i].reply_date)+"</small>";	
+				str +=  "</div>";
+				str +=	"<p>"+list[i].reply+"</p>";				
+				str +=	"<button type = 'button' class = 'btn btn-light removeReplyBtn'><small>삭제</small></button>";
+				str +=	"<button type = 'button' class = 'btn btn-light modReplyBtn'><small>수정</small></button>";
+				str +=	"<hr>";
+				str +="</li>";
+										
+		}//for end			
+		
+			replyUL.html(str);
+			showReplyPage(replyCnt);
+		});// getList end
+	}// showList end
+	
+	let pageNum = 1;
+	let replyPageFooter = $(".chat-footer");
+	
+	//댓글 페이징
+	function showReplyPage(replyCnt) {
+		
+		let endNum = Math.ceil(pageNum / 10.0) * 10.0;
+		let startNum = endNum - 9;
+		
+		let prev = startNum != 1;
+		let next = false;
+		
+		if(endNum * 10 >= replyCnt) {
+			endNum = Math.ceil(replyCnt/10.0);
+		}
+		
+		if(endNum * 10 < replyCnt) {
+			next = true;
+		}
+		
+		let str = "<ul class='pagination'>";
+		
+		if(prev) {
+			str += "<li class = 'paginate_button page-item previous'><a class = 'page-link' href = '"+(startNum -1)+"'>Previous</a></li>";
+		}
+		
+		for (let i = startNum; i <= endNum; i++) {
+			let active = pageNum == i? "active" : "";
+			
+			str += "<li class = 'paginate_button page-item previous "+active+"'><a class = 'page-link' href = '"+i+"'>"+i+"</a></li>";
+		}
+		
+		if(next) {
+			str += "<li class = 'paginate_button page-item next'><a class='page-link' href='"+(endNum +1)+"'>Next</a></li>";
+		}
+		
+		str += "</ul>";
+		
+		replyPageFooter.html(str);
+		
+	}
+		
+	replyPageFooter.on("click", "li a", function(e){
+		e.preventDefault();
+		
+		let targetPageNum = $(this).attr("href");
+		
+		pageNum = targetPageNum;
+		
+		showList(pageNum);
+	});
+	
 	
 	let replyValue = $(".replyValue");	
 	let replyText = $("#replyBox");
@@ -179,89 +276,43 @@ $(document).ready(function(){
 	console.log(InputReplyer.val());
 		
 	let InputReply_date = replyValue.find("input[name='reply_date']");
-	
-		
+			
 	let csrfHeaderName = "${_csrf.headerName}";
 	let csrfTokenValue = "${_csrf.token}";
 	
+	//지금 접속해 있는 유저
 	let replyer = null;
 	
 	<sec:authorize access = "isAuthenticated()">
 		replyer = '<sec:authentication property = "principal.username"/>'
 	</sec:authorize>
-	
+		
 	//Ajax spring security header....
 	$(document).ajaxSend(function(e, xhr, options) {
 		xhr.setRequestHeader(csrfHeaderName, csrfTokenValue);
 	});
 	
-	showList(1);
-	
-	//댓글리스트 출력
-	function showList(page) {
-		
-		console.log("show List " + page);
-		
-		replyService.getList({bno:bnoValue, page:page||1}, function(replyCnt, list) {
-			
-			console.log("Cnt : " + replyCnt);
-			
-			if(page == -1){
-				pageNum = Math.ceil(replyCnt/10.0);
-				showList(pageNum);				
-				console.log("pageNum " + pageNum);
-				return;
-			}
 
-			let str = "";
-			
-			if(list == null || list.length == 0) {
-				return;
-			}
-			
-			
-			//list만큼 출력
-			for (let i =0, len = list.length || 0; i < len; i++) {
-								
-				str +="<li id = 'replyList"+list[i].rno+"' data-rno = '"+list[i].rno+"'>";
-				str +=	"<div id = 'header"+list[i].rno+"' data-replyer = '"+list[i].replyer+"'>";
-				str +=		"<strong>"+list[i].replyer+"</strong>";
-				str +=	"</div>";
-				str +=	"<small id = 'dateValue' class ='pull-right'>"+replyService.displayTime(list[i].reply_date)+"</small></div>";
-				str +=	"<p>"+list[i].reply+"</p>";
-				str +=	"<button type = 'button' class = 'btn btn-light removeReplyBtn'><small>삭제</small></button>";
-				str +=	"<button type = 'button' class = 'btn btn-light modReplyBtn'><small>수정</small></button>";
-				str +=	"<hr>";
-				str +="</li>";
-										
-		}//for end
-			
-		
-			replyUL.html(str);
-			showReplyPage(replyCnt);
-		});// getList end
-	}// showList end
-		
 	//댓글등록
 	addReplyBtn.on("click", function(e){
 		
 		let box = $('#replyBox');
-
-		let reply = {
-				
+		let reply = {			
 				reply : InputReply.val(),
 				replyer : InputReplyer.val(),
 				bno : bnoValue				
 		};				
+		box.find('textarea').val("");
 		
-		replyService.add(reply, function(result){
+		replyService.add(reply, function(){
 			
-			box.find('textarea').val("");
-			showList(-1);
+			showList(1);
 
 		});		
 		
 	});
+	
+	
 	
 	//댓글수정뷰
 	$(document).on('click', '.modReplyBtn', function(){
@@ -349,60 +400,7 @@ $(document).ready(function(){
 		
 	});
 	
-	let pageNum = 1;
-	let replyPageFooter = $(".chat-footer");
-	
-	//댓글 페이징
-	function showReplyPage(replyCnt) {
-		
-		let endNum = Math.ceil(pageNum / 10.0) * 10.0;
-		let startNum = endNum - 9;
-		
-		let prev = startNum != 1;
-		let next = false;
-		
-		if(endNum * 10 >= replyCnt) {
-			endNum = Math.ceil(replyCnt/10.0);
-		}
-		
-		if(endNum * 10 < replyCnt) {
-			next = true;
-		}
-		
-		let str = "<ul class='pagination'>";
-		
-		if(prev) {
-			str += "<li class = 'paginate_button page-item previous'><a class = 'page-link' href = '"+(startNum -1)+"'>Previous</a></li>";
-		}
-		
-		for (let i = startNum; i <= endNum; i++) {
-			let active = pageNum == i? "active" : "";
-			
-			str += "<li class = 'paginate_button page-item previous "+active+"'><a class = 'page-link' href = '"+i+"'>"+i+"</a></li>";
-		}
-		
-		if(next) {
-			str += "<li class = 'paginate_button page-item next'><a class='page-link' href='"+(endNum +1)+"'>Next</a></li>";
-		}
-		
-		str += "</ul>";
-		
-		replyPageFooter.html(str);
-		
-	}
-	
-	replyPageFooter.on("click", "li a", function(e){
-		e.preventDefault();
-		console.log("page click");
-		
-		let targetPageNum = $(this).attr("href");
-		console.log("targetPageNum : " + targetPageNum);
-		
-		pageNum = targetPageNum;
-		
-		showList(pageNum);
-	});
-	
+
 	
 });
 </script>
