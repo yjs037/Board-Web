@@ -1,5 +1,7 @@
 package com.board.domain;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -15,4 +17,7 @@ public class MemberVO {
 	private String mem_birth;
 	private String mem_phone;
 	private String mem_gender;
+	private boolean enabled;
+	
+	private List<AuthVO> authList;
 }

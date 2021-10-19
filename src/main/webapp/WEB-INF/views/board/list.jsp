@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"	pageEncoding="UTF-8"%>
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/core" prefix = "c"%>
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/fmt" prefix = "fmt"%>
+<%@ taglib uri = "http://www.springframework.org/security/tags" prefix = "sec" %>
 <%@include file="../includes/header.jsp"%>
 <style>
 	#regBtn {
@@ -42,13 +43,72 @@
 	
 
 </style>
+
+<!-- Topbar -->
+<nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+	<!-- Topbar Navbar -->
+	<ul class="navbar-nav ml-auto">
+		<!-- Nav Item - User Information -->
+		<li class="nav-item dropdown no-arrow">
+			<a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			 <span class="mr-2 d-none d-lg-inline text-gray-600 small"><sec:authentication property="principal.username"/> 님 환영합니다.</span>
+			 <img class="img-profile rounded-circle" src="/resources/img/undraw_profile.svg">
+			</a>
+			 <!-- Dropdown - User Information -->
+			<div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+			
+				<a class="dropdown-item" href="/member/update">
+				 <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>	회원정보수정
+				</a>
+				
+				<a class="dropdown-item" data-toggle="modal" data-target="#logoutModal"> 
+					<sec:authorize access = "isAuthenticated()">
+						<i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> 로그아웃
+					</sec:authorize>
+				</a>
+				
+			</div>
+		</li>
+	</ul>
+		
+</nav>
+
+<!-- Logout Modal-->
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+				<button class="close" type="button" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">×</span>
+				</button>
+			</div>
+			<div class="modal-body">로그아웃 하시겠습니까?</div>
+			<div class="modal-footer">
+				<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+				<form id="logout" action="/logout" method="post">
+					<input name="${_csrf.parameterName}" type="hidden" value="${_csrf.token}"/>
+					<button id="logoutBtn" class="btn btn-primary">Logout</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- End of Topbar -->
+
+
+
 <!-- Page Heading -->
 <h1 class="h3 mb-2 text-gray-800">Tables</h1>
 <hr>
 <!-- DataTales Example -->
 <div class="card shadow mb-4">
 	<div class="card-header py-3 font-weight-bold text-primary">Board List
-	<button id = 'regBtn' type = "button" class = "btn btn-primary">Register New Board</button>
+	<sec:authorize access = "isAuthenticated()">
+		<button id = 'regBtn' type = "button" class = "btn btn-primary">Register New Board</button>
+	</sec:authorize>
 	</div>
 	<div class="card-body">
 		<div class="table-responsive">
@@ -136,9 +196,9 @@
 							</c:if>
 													
 						</ul>
-					</div>
+					</div>					
 
-				<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+				<div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 					<div class="modal-dialog" role="document">
 						<div class="modal-content">
 							<div class="modal-header">
@@ -147,13 +207,14 @@
 							        <span aria-hidden="true">×</span>
 							    </button>
 							</div>
-							<div class="modal-body">처리되었습니다.</div>
+							<div class="modal-body register-modal-body">처리되었습니다.</div>
 							<div class="modal-footer">
 							    <button class="btn btn-secondary" type="button" data-dismiss="modal">확인</button>
 							</div>
 						</div>
 					</div>
 				</div>
+				
 			</div>
 		</div> <!-- end table-responsive -->
 	</div>
@@ -179,9 +240,9 @@
 				return;
 			}
 			if (parseInt(result) > 0) {
-				$(".modal-body").html("게시글 " + parseInt(result) + "번이 등록되었습니다.");
+				$(".register-modal-body").html("게시글 " + parseInt(result) + "번이 등록되었습니다.");
 			}
-			$("#logoutModal").modal("show");
+			$("#registerModal").modal("show");
 		}
 		
 		//게시글 등록버튼
@@ -229,6 +290,13 @@
 			e.preventDefault();
 			
 			searchForm.submit();
+		});
+		
+		//로그아웃 버튼
+		$(".logoutBtn").on("click", function(e){
+			e.preventDefault();
+			
+			$("form").submit();
 		});
 		
 	});

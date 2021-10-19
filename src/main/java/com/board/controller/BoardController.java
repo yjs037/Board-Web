@@ -1,6 +1,7 @@
 package com.board.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,8 +26,7 @@ public class BoardController {
 	
 		@Setter(onMethod_ = @Autowired)
 		private BoardService service;
-		
-	
+			
 		@GetMapping("/list")
 		public void list(Model model, Criteria cri) {
 			
@@ -42,11 +42,13 @@ public class BoardController {
 		}
 		
 		@GetMapping("/register")
+		@PreAuthorize("isAuthenticated()")
 		public void register() {
 			
 		}		
 		
 		@PostMapping("/register")
+		@PreAuthorize("isAuthenticated()")
 		public String register(BoardVO board, RedirectAttributes rttr) {
 			
 			log.info("register : " + board);
@@ -66,6 +68,7 @@ public class BoardController {
 			
 		}
 		
+		@PreAuthorize("principal.username == #board.writer")
 		@PostMapping("/modify")
 		public String modify(BoardVO board, RedirectAttributes rttr, @ModelAttribute("cri") Criteria cri) {
 			
@@ -78,6 +81,7 @@ public class BoardController {
 			return "redirect:/board/list" + cri.getListLink();
 		}
 		
+		@PreAuthorize("principal.username == #writer")
 		@PostMapping("/remove")
 		public String remove(@RequestParam("bno") Long bno, RedirectAttributes rttr, @ModelAttribute("cri") Criteria cri) {
 			

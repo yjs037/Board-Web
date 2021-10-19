@@ -34,6 +34,15 @@ public class MemberMapperTests {
 		log.info(member);
 		
 	}
+	
+	@Test
+	public void testRead() {
+		MemberVO vo = mapper.read("user79");
+		
+		log.info(vo);
+		
+		vo.getAuthList().forEach(authVO -> log.info(authVO));
+	}
 
 }
 

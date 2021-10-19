@@ -19,6 +19,8 @@ public interface MemberMapper {
 	//비밀번호 체크
 	public int passChk(MemberVO memberVo);
 	
+	public MemberVO read(String id);
+	
 
 
 }

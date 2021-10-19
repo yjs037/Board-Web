@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"	pageEncoding="UTF-8"%>
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/core" prefix = "c"%>
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/fmt" prefix = "fmt"%>
+<%@ taglib uri = "http://www.springframework.org/security/tags" prefix = "sec" %>
 <%@include file="../includes/header.jsp"%>
 
 <!-- Page Heading -->
@@ -16,6 +17,8 @@
 	<div class="card-body">
 		
 				<form role = "form" action = "/board/register" method = "post">
+					<input type = 'hidden' name = "${_csrf.parameterName}" value = "${_csrf.token}"/>
+					
 					<div class = "form-group">
 						<label>제목</label>
 						<input class = "form-control" name = "title"/>
@@ -28,13 +31,12 @@
                                   
 					<div class = "form-group">
 						<label>작성자</label>
-						<input class = "form-control" name = "writer"/>
+						<input class = "form-control" name = "writer" value = '<sec:authentication property = "principal.username"/>' readonly = "readonly"/>
 					</div>
 						
 					<button type = "submit" class = "btn btn-secondary btn-icon-split">글쓰기</button>
 					<button type = "button" class = "btn btn-secondary btn-icon-split" onclick ="location.href='/board/list'">취소</button>
 				</form>
-
 
 	</div>
 	

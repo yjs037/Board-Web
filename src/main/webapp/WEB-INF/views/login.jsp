@@ -1,4 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"	pageEncoding="UTF-8"%>
+<%@ taglib uri = "http://java.sun.com/jsp/jstl/core" prefix = "c"%>
+<%@ taglib uri = "http://java.sun.com/jsp/jstl/fmt" prefix = "fmt"%>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,7 +12,7 @@
 <meta name="description" content="">
 <meta name="author" content="">
 
-<title>SB Admin 2 - Login</title>
+<title>Board</title>
 
 <!-- Custom fonts for this template-->
 <link href="/resources/vendor/fontawesome-free/css/all.min.css" rel="stylesheet"	type="text/css">
@@ -37,35 +39,40 @@
 							<div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
 							<div class="col-lg-6">
 								<div class="p-5">
+								
 									<div class="text-center">
 										<h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
-									</div>
-									<form class="user">
+									</div>					
+									
+									<form class="user" method = 'post' action = "/login">
 										<div class="form-group">
-											<input type="email" class="form-control form-control-user"
-												id="exampleInputEmail" aria-describedby="emailHelp"
-												placeholder="ID">
+											<input type="text" class="form-control form-control-user" name = "mem_id" placeholder="ID">
 										</div>
+										
 										<div class="form-group">
-											<input type="password" class="form-control form-control-user"
-												id="exampleInputPassword" placeholder="Password">
+											<input type="password" class="form-control form-control-user"	name = "mem_pw" placeholder="Password">
 										</div>
+										
 										<div class="form-group">
-											<div class="custom-control custom-checkbox small">
-												<input type="checkbox" class="custom-control-input"
-													id="customCheck"> <label class="custom-control-label" for="customCheck">Remember	Me</label>
-											</div>
+											<label>
+		 										<input type="checkbox" id="customCheck"> Remember	Me
+											</label>
 										</div>
-										<a href="/board/list" class="btn btn-primary btn-user btn-block"> Login </a>
+										
+										<button class="btn btn-primary btn-user btn-block">Login</button>
+										<input type = 'hidden' name = "${_csrf.parameterName}" value = "${_csrf.token}"/>
 										<hr>
 									</form>
-									<hr>
+									
+									<hr>									
 									<div class="text-center">
 										<a class="small" href="/member/register">Create an Account!</a>
 									</div>
-									<div class="text-center">
+									
+									<!-- <div class="text-center">
 										<a class="small" href="#">Forgot	Password?</a>
-									</div>
+									</div> -->
+									
 								</div>
 							</div>
 						</div>
@@ -77,8 +84,26 @@
 		</div>
 
 	</div>
+<!-- Bootstrap core JavaScript-->
+<script src="/resources/vendor/jquery/jquery.min.js"></script>
+<script src="/resources/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
+<!-- Core plugin JavaScript-->
+<script src="/resources/vendor/jquery-easing/jquery.easing.min.js"></script>
 
+<!-- Custom scripts for all pages-->
+<script src="/resources/js/sb-admin-2.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	
+	$(".btn-user").on("click", function(e){
+		e.preventDefault();
+		
+		$("form").submit();
+	});
+});
+	
+</script>
 </body>
 
 </html>

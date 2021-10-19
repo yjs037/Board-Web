@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/security
+	  http://www.springframework.org/schema/security/spring-security.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id = "bcryptPasswordEncoder" class = "org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></bean>
+	<bean id = "customLoginSuccess" class = "com.board.security.CustomLoginSuccessHandler"></bean>
+	<bean id = "customUserDetailsService" class = "com.board.security.CustomUserDetailsService"></bean>
+	<bean id = "customLogoutSuccess" class = "com.board.security.CustomLogoutSuccessHandler"></bean>
+
+	<security:http>
+	
+		<security:intercept-url pattern = "/board/**" access = "hasRole('ROLE_USER')"/>		
+		<security:intercept-url pattern = "/member/update" access = "hasRole('ROLE_USER')"/>
+				
+		<security:intercept-url pattern = "/member/register" access = "permitAll"/>
+		<security:intercept-url pattern = "/" access = "permitAll"/>
+			
+		<security:form-login
+			username-parameter="mem_id"
+			password-parameter="mem_pw"
+			login-page="/" 
+			authentication-success-handler-ref="customLoginSuccess"/>
+			<!-- default-target-url="/board/list" -->
+			
+			
+		<security:logout
+			logout-url="/logout"
+			success-handler-ref="customLogoutSuccess"
+			invalidate-session="true"
+			delete-cookies="remember-me, JSESSION_ID"/>	
+			
+<!-- 			<security:remember-me
+			data-source-ref="dataSource" token-validity-seconds="604800"/> -->
+			
+		<!-- <security:csrf disabled="true"/>	 -->
+			
+	</security:http>
+	
+	<security:authentication-manager>
+		<security:authentication-provider user-service-ref="customUserDetailsService">
+				
+			
+			<security:password-encoder ref = "bcryptPasswordEncoder"/>
+		
+		</security:authentication-provider>	
+	</security:authentication-manager>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+</beans>

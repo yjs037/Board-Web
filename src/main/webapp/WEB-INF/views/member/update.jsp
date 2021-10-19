@@ -10,7 +10,7 @@
 <meta name="description" content="">
 <meta name="author" content="">
 
-<title>Register</title>
+<title>update</title>
 <style>
 	label {	font-weight: bold; }
 	

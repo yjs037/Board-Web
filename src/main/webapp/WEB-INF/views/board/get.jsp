@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"	pageEncoding="UTF-8"%>
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/core" prefix = "c"%>
 <%@ taglib uri = "http://java.sun.com/jsp/jstl/fmt" prefix = "fmt"%>
+<%@ taglib uri = "http://www.springframework.org/security/tags" prefix = "sec" %>
 <%@include file="../includes/header.jsp"%>
 <style>
  .chat {
@@ -70,7 +71,6 @@
 
  </style>
 
-
 <!-- Page Heading -->
 <h1 class="h3 mb-2 text-gray-800">Board Read</h1>
 <hr>
@@ -102,7 +102,13 @@
 			<input class = "form-control" name = "writer" value = "<c:out value = "${board.writer}"/>" readonly = "readonly"/>
 		</div>
 		
-		<button data-oper = 'modify' class = "btn btn-secondary btn-icon-split">수정</button>
+		<sec:authentication property="principal" var = "pinfo"/>
+			
+			<sec:authorize access = "isAuthenticated()">
+				<c:if test="${pinfo.username eq board.writer }">
+					<button data-oper = 'modify' class = "btn btn-secondary btn-icon-split">수정</button>
+				</c:if>
+			</sec:authorize>
 		<button data-oper = 'list' class = "btn btn-secondary btn-icon-split">목록</button>
 		
 		<form id = 'operForm' action = "/board/modify" method = "get">
@@ -127,13 +133,11 @@
 			<li id = "replyList" data-rno = "">
 				<!-- 댓글 목록이 들어가는 곳 -->
 			
-				<div>
-					<div class = "header">
-						<strong></strong> <!-- 작성자  -->
+					<div class = "header" data-replyer = "">
+						<strong data-rno = ""></strong> <!-- 작성자  -->
 						<small class = "pull-right"></small> <!-- 날짜 -->
 					</div>
 					<p></p> <!-- 댓글 -->
-				</div>
 			</li>
 		</ul>
 		
@@ -151,7 +155,7 @@
 	</div>
 	
 	<div class = "replyValue">
-		<input type = "hidden" name = "replyer" value = "replyer"/>
+		<input type = "hidden" name = "replyer" value = "<sec:authentication property = "principal.username"/>"/>
 		<input type = "hidden" name = "reply_date" value = ""/>
 	</div>
 </div><!-- end card shadow mb-4 -->
@@ -163,15 +167,33 @@ $(document).ready(function(){
 	let bnoValue = '<c:out value = "${board.bno}"/>';
 	let replyUL = $(".chat");
 	
-	let replyValue = $(".replyValue");
+	let replyValue = $(".replyValue");	
+	let replyText = $("#replyBox");
 	
 	let addReplyBtn = $("#addReplyBtn");
 	let modReplyBtn = $(".modReplyBtn");
 	let removeReplyBtn = $(".removeReplyBtn");
 	
-	let InputReply = replyValue.find("textarea[name='reply']");
+	let InputReply = replyText.find("textarea[name='reply']");
 	let InputReplyer = replyValue.find("input[name='replyer']");
+	console.log(InputReplyer.val());
+		
 	let InputReply_date = replyValue.find("input[name='reply_date']");
+	
+		
+	let csrfHeaderName = "${_csrf.headerName}";
+	let csrfTokenValue = "${_csrf.token}";
+	
+	let replyer = null;
+	
+	<sec:authorize access = "isAuthenticated()">
+		replyer = '<sec:authentication property = "principal.username"/>'
+	</sec:authorize>
+	
+	//Ajax spring security header....
+	$(document).ajaxSend(function(e, xhr, options) {
+		xhr.setRequestHeader(csrfHeaderName, csrfTokenValue);
+	});
 	
 	showList(1);
 	
@@ -183,12 +205,11 @@ $(document).ready(function(){
 		replyService.getList({bno:bnoValue, page:page||1}, function(replyCnt, list) {
 			
 			console.log("Cnt : " + replyCnt);
-			console.log("list : " + list);
-			console.log(list);
 			
 			if(page == -1){
 				pageNum = Math.ceil(replyCnt/10.0);
 				showList(pageNum);				
+				console.log("pageNum " + pageNum);
 				return;
 			}
 
@@ -201,19 +222,132 @@ $(document).ready(function(){
 			
 			//list만큼 출력
 			for (let i =0, len = list.length || 0; i < len; i++) {
+								
 				str +="<li id = 'replyList"+list[i].rno+"' data-rno = '"+list[i].rno+"'>";
-				str +="<div><div class = 'header replyer'><strong>"+list[i].replyer+"</strong>";
-				str +="<small id = 'dateValue' class ='pull-right'>"+replyService.displayTime(list[i].reply_date)+"</small></div>";
-				str +="<p>"+list[i].reply+"</p>";
-				str +="<button type = 'button' class = 'btn btn-light removeReplyBtn'><small>삭제</small></button>";
-				str +="<button type = 'button' class = 'btn btn-light modReplyBtn'><small>수정</small></button>";
-				str +="<hr></div></li>";
-			}//for end
+				str +=	"<div id = 'header"+list[i].rno+"' data-replyer = '"+list[i].replyer+"'>";
+				str +=		"<strong>"+list[i].replyer+"</strong>";
+				str +=	"</div>";
+				str +=	"<small id = 'dateValue' class ='pull-right'>"+replyService.displayTime(list[i].reply_date)+"</small></div>";
+				str +=	"<p>"+list[i].reply+"</p>";
+				str +=	"<button type = 'button' class = 'btn btn-light removeReplyBtn'><small>삭제</small></button>";
+				str +=	"<button type = 'button' class = 'btn btn-light modReplyBtn'><small>수정</small></button>";
+				str +=	"<hr>";
+				str +="</li>";
+										
+		}//for end
 			
+		
 			replyUL.html(str);
 			showReplyPage(replyCnt);
 		});// getList end
 	}// showList end
+		
+	//댓글등록
+	addReplyBtn.on("click", function(e){
+		
+		let box = $('#replyBox');
+
+		let reply = {
+				
+				reply : InputReply.val(),
+				replyer : InputReplyer.val(),
+				bno : bnoValue				
+		};				
+		
+		replyService.add(reply, function(result){
+			
+			box.find('textarea').val("");
+			showList(-1);
+
+		});		
+		
+	});
+	
+	//댓글수정뷰
+	$(document).on('click', '.modReplyBtn', function(){
+		
+		let repliesView = "";
+		let rno = $(this).closest("li[data-rno]").attr('data-rno');
+		let originalReplyer = $("#header"+rno).closest("div[data-replyer]").attr('data-replyer');
+		let replyLI = $("#replyList"+rno);
+		
+		if(replyer != originalReplyer) {
+			alert("자신이 작성한 댓글만 삭제가 가능합니다.");
+			return;
+		}
+
+		replyService.get(rno, function(r){
+			
+			let rno = r.rno;
+			let replyer = r.replyer;
+			let reply_date = replyService.displayTime(r.reply_date);
+			let reply = r.reply;
+			
+			repliesView +=	"<li id='replyList"+rno+"' data-rno='"+rno+"'>";
+			repliesView += 		"<div id = 'header"+rno+"' data-replyer = '"+replyer+"'>";
+			repliesView +=			"<strong>"+replyer+"</strong>";
+			repliesView += 			"<small id='dateValue' class='pull-right'>'"+reply_date+"'</small>";
+			repliesView += 		"</div>";
+			repliesView +=		"<div id = 'rHeight'>";
+			repliesView += 			"<div id = 'replyBox' class = 'reply-insert card shadow mb-4 replyValue'>";
+			repliesView +=				"<textarea id = 'reply_content"+rno+"' name = 'reply' class = 'autosize' rows = '1' onkeydown = 'resize(this)' onkeyup='resize(this)' placeholder='댓글을 남겨보세요'>";
+			repliesView +=					reply;	
+			repliesView +=  			"</textarea>";
+			repliesView +=			"</div>";
+			repliesView +=			"<div>";
+			repliesView +=				"<button type='button' class='btn btn-light resetBtn'><small>취소</small></button>";
+			repliesView +=				"<button type='button' class='btn btn-light modBtn'><small>등록</small></button>";
+			repliesView +=			"</div>";
+			repliesView +=		"</div>";
+			repliesView +=	"</li>";
+			
+			replyLI.replaceWith(repliesView);
+			$('#reply_content'+rno).focus();
+			
+		});		
+	});	
+	
+	//댓글수정버튼
+	$(document).on('click', '.modBtn', function(){
+		
+		let rno = $(this).closest("li[data-rno]").attr('data-rno');
+		let content = $('#reply_content'+rno).val();
+		let reply = { rno :rno,	reply : content };
+		
+		replyService.update(reply, function(result){ 
+			showList(pageNum);
+			
+		});
+		
+	});
+	
+	//댓글수정취소
+	$(document).on('click', '.resetBtn', function(){
+		
+		showList(pageNum);
+		
+	});
+	
+	//댓글삭제
+	$(document).on('click', '.removeReplyBtn', function(e){
+		
+		let rno = $(this).closest("li[data-rno]").attr('data-rno');
+		let originalReplyer = $('#header'+rno).closest("div[data-replyer]").attr('data-replyer');
+		
+		console.log("ori"+originalReplyer);
+		console.log("rep"+replyer);
+				
+		if(replyer != originalReplyer) {
+			alert("자신이 작성한 댓글만 삭제가 가능합니다.");
+			return;
+		}
+		
+		replyService.remove(rno, originalReplyer, function(result){
+			showList(pageNum);	
+			
+		});
+		
+	});
 	
 	let pageNum = 1;
 	let replyPageFooter = $(".chat-footer");
@@ -253,7 +387,6 @@ $(document).ready(function(){
 		
 		str += "</ul>";
 		
-		console.log(str);
 		replyPageFooter.html(str);
 		
 	}
@@ -269,100 +402,6 @@ $(document).ready(function(){
 		
 		showList(pageNum);
 	});
-	
-	
-	//댓글등록
-	addReplyBtn.on("click", function(e){
-		
-		let box = $('#replyBox');
-		let reply = {
-				
-				reply : InputReply.val(),
-				replyer : InputReplyer.val(),
-				bno : bnoValue				
-		};				
-		
-		replyService.add(reply, function(result){
-			
-			box.find('textarea').val("");
-			showList(-1);
-
-		});		
-		
-	});
-	
-	//댓글수정뷰
-	$(document).on('click', '.modReplyBtn', function(){
-		
-		let repliesView = "";
-		let rno = $(this).closest("li[data-rno]").attr('data-rno');
-		let replyLI = $("#replyList"+rno);
-
-		replyService.get(rno, function(r){
-			
-			let rno = r.rno;
-			let replyer = r.replyer;
-			let reply_date = replyService.displayTime(r.reply_date);
-			let reply = r.reply;
-			
-			repliesView +=	"<li id='replyList"+rno+"' data-rno='"+rno+"'>";
-			repliesView += 		"<div>";
-			repliesView +=			"<strong>"+replyer+"</strong>";
-			repliesView += 			"<small id='dateValue' class='pull-right'>'"+reply_date+"'</small>";
-			repliesView += 		"</div>";
-			repliesView +=		"<div id = 'rHeight'>";
-			repliesView += 			"<div id = 'replyBox' class = 'reply-insert card shadow mb-4 replyValue'>";
-			repliesView +=				"<textarea id = 'reply_content"+rno+"' name = 'reply' class = 'autosize' rows = '1' onkeydown = 'resize(this)' onkeyup='resize(this)' placeholder='댓글을 남겨보세요'>";
-			repliesView +=					reply;	
-			repliesView +=  			"</textarea>";
-			repliesView +=			"</div>";
-			repliesView +=			"<div>";
-			repliesView +=				"<button type='button' class='btn btn-light resetBtn'><small>취소</small></button>";
-			repliesView +=				"<button type='button' class='btn btn-light modBtn'><small>등록</small></button>";
-			repliesView +=			"</div>";
-			repliesView +=		"</div>";
-			repliesView +=	"</li>";
-			
-			replyLI.replaceWith(repliesView);
-			$('#reply_content'+rno).focus();
-			
-		});		
-	});	
-	
-	//댓글수정
-	$(document).on('click', '.modBtn', function(){
-		
-		let rno = $(this).closest("li[data-rno]").attr('data-rno');
-		let content = $('#reply_content'+rno).val();
-		let reply = { rno :rno,	reply : content };
-		
-		replyService.update(reply, function(result){
-			showList(pageNum);
-			
-		});
-		
-	});
-	
-	//댓글수정취소
-	$(document).on('click', '.resetBtn', function(){
-		
-		showList(pageNum);
-		
-	});
-	
-	//댓글삭제
-	$(document).on('click', '.removeReplyBtn', function(){
-		
-		let rno = $(this).closest("li[data-rno]").attr('data-rno');
-		
-		replyService.remove(rno, function(result){
-			
-			showList(pageNum);
-			
-		});
-		
-	});
-	
 	
 	
 });
@@ -382,7 +421,7 @@ $(document).ready(function(){
 	$("button[data-oper = 'list']").on("click", function(e){
 		
 		operForm.find("#bno").remove();
-		operForm.attr("action", "/board/list")
+		operForm.attr("action", "/board/list");
 		operForm.submit();
 	});
 	
