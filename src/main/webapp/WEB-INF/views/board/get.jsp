@@ -306,7 +306,7 @@ $(document).ready(function(){
 		
 		replyService.add(reply, function(){
 			
-			showList(1);
+			showList(-1);
 
 		});		
 		

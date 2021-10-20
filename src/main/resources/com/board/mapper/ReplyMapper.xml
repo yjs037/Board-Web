@@ -24,14 +24,10 @@
 </update>
 
 <select id = "getListWithPaging" resultType = "com.board.domain.ReplyVO">
-<![CDATA[
 	SELECT a.rno, a.bno, reply, replyer, reply_date, update_date
 		FROM (select rno from tbl_reply where bno = #{bno} 
 			order by rno desc limit #{cri.page}, #{cri.amount} ) b
-	JOIN tbl_reply a ON a.rno = b.rno;
-]]>
-
-
+	JOIN tbl_reply a ON a.rno = b.rno
 </select>
 
 <select id = "getCountByRno" resultType = "int">

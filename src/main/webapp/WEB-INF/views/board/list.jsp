@@ -58,7 +58,7 @@
 			 <!-- Dropdown - User Information -->
 			<div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
 			
-				<a class="dropdown-item" href="/member/update">
+				<a id = "memUpdate" class="dropdown-item" href="/member/update">
 				 <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>	회원정보수정
 				</a>
 				
@@ -227,6 +227,10 @@
 	<input type = "hidden" name = "type" value = '<c:out value = "${pageMaker.cri.type }"/>'/>
 </form>
 
+<form id ="updateForm" action = "/member/update" method = "get">
+	<input type = "hidden" name = "mem_id" value = "<sec:authentication property = "principal.username"/>"/>
+</form>
+
 <script type = "text/javascript">
 	$(document).ready(function(){
 		
@@ -269,6 +273,13 @@
 			actionForm.append("<input type='hidden' name='bno' value='"+$(this).attr("href")+"'>");
 			actionForm.attr("action", "/board/get");
 			actionForm.submit();
+		});
+		
+		//회원정보 수정
+		$("#memUpdate").on("click", function(e){
+			e.preventDefault();
+			let updateForm = $("#updateForm");
+			updateForm.submit();
 		});
 		
 		let searchForm = $("#searchForm");

@@ -33,14 +33,14 @@
        <include refid="criteria"></include>
      </if>
 		order by bno desc limit #{page}, #{amount}) b
-	JOIN tbl_board a ON a.bno = b.bno;
+	JOIN tbl_board a ON a.bno = b.bno
 
 </select>
 
 <!-- 게시글 등록, bno값 얻어오기  -->
 <insert id = "insertSelectKey">
 	<selectKey keyProperty="bno" order = "AFTER" resultType = "long">
-		select last_insert_id();
+		select last_insert_id()
 	</selectKey>
 	
 	insert into tbl_board (bno, title, content, writer)

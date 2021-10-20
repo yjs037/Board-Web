@@ -7,6 +7,11 @@
 			VALUES (#{mem_id}, #{mem_pw}, #{mem_name}, #{mem_birth}, #{mem_phone}, #{mem_gender})
 	</insert>
 	
+	<insert id = "authInsert" parameterType="com.board.domain.AuthVO">
+		INSERT into tbl_member_auth(mem_id, auth)
+			VALUES (#{mem_id}, #{auth})
+	</insert>
+	
 	<select id="idCheck" parameterType="String" resultType = "int">
 		SELECT count(mem_id) from tbl_member
 			WHERE mem_id = #{mem_id}
@@ -39,8 +44,19 @@
 		SELECT mem.mem_id, mem_pw, mem_name, mem_birth, mem_phone, mem_gender, enabled, auth
 		FROM tbl_member mem 
 		LEFT OUTER JOIN tbl_member_auth auth on mem.mem_id = auth.mem_id
-		WHERE mem.mem_id = #{mem_id};
+		WHERE mem.mem_id = #{mem_id}
 	</select>
+	
+	<update id = "updateAccount">
+		UPDATE tbl_member 
+			SET mem_name = #{mem_name}, mem_pw = #{mem_pw}, mem_phone = #{mem_phone}
+		WHERE mem_id = #{mem_id}
+	</update>
+	
+	<delete id = "deleteAccount">
+		DELETE from tbl_member
+			WHERE mem_id = #{mem_id}	
+	</delete>
 	
 
 </mapper>

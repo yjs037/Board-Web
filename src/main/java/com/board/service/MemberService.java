@@ -6,13 +6,15 @@ public interface MemberService {
 	
 	public void register(MemberVO vo);
 	
-	public void modify(MemberVO vVo);
+	public boolean updateAccount(MemberVO Vo);
 	
-	public void delete(MemberVO vo);
+	public boolean deleteAccount(String id);
 	
 	public int idCheck(String id);
 	
 	public int passChk(MemberVO vo);
 
+	public MemberVO get(String id);
+	
 
 }

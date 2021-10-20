@@ -44,16 +44,17 @@
 							</div>
 							
 							<form role = "form" class="user" action = "/member/register" method = "post">
+								<input name="${_csrf.parameterName}" type="hidden" value="${_csrf.token}"/>
 							
 								<div class="form-group">
 									<label for ="mem_name">이름</label>
-									<input type="text" class="form-control form-control-user" id="mem_name" name = "mem_name" placeholder="Name"/>
+									<input type="text" class="form-control form-control-user" id="mem_name" name = "mem_name" placeholder="Name" autocomplete="off"/>
 									<div id = "name_check"></div>
 								</div>
 								
 								<div class="form-group">
 									<label for ="mem_id">아이디</label>
-									<input type="text" class="form-control form-control-user" id="mem_id" name = "mem_id" oninput = "checkId()" placeholder="ID"/>
+									<input type="text" class="form-control form-control-user" id="mem_id" name = "mem_id" oninput = "checkId()" placeholder="ID" autocomplete="off"/>
 									<div id = "id_check"></div>
 									<span class ="id_ok">사용 가능한 아이디입니다.</span>
 									<span class ="id_already">중복된 아이디입니다.</span>
@@ -62,34 +63,34 @@
 								<div class="form-group row">
 									<div class="col-sm-6 mb-3 mb-sm-0">
 										<label for ="mem_pw">비밀번호</label>
-										<input type="password" class="form-control form-control-user" id="mem_pw" name = "mem_pw" placeholder="Password"/>
+										<input type="password" class="form-control form-control-user" id="mem_pw" name = "mem_pw" placeholder="Password" autocomplete="off"/>
 										<div id = "pw_check"></div>
 									</div>
 									<div class="col-sm-6">
 										<label for ="mem_pw2">비밀번호 확인</label>
-										<input type="password" class="form-control form-control-user" id="mem_pw2" name = "mem_pw2" placeholder="Repeat Password"/>
+										<input type="password" class="form-control form-control-user" id="mem_pw2" name = "mem_pw2" placeholder="Repeat Password" autocomplete="off"/>
 										<div id = "pw2_check"></div>
 									</div>
 								</div>
 								
 								<div class="form-group">
 									<label for ="mem_birth">생년월일</label>
-									<input type="text" class="form-control form-control-user" id="mem_birth" name ="mem_birth" placeholder="ex) 19990101"/>
+									<input type="text" class="form-control form-control-user" id="mem_birth" name ="mem_birth" placeholder="ex) 19990101" autocomplete="off"/>
 									<div id = "birth_check"></div>
 								</div>
 								
 								<div class="form-group">
 									<label for ="mem_phone">휴대폰 번호('-'없이 번호만 입력해주세요)</label>
-									<input type="text" class="form-control form-control-user" id="mem_phone" name ="mem_phone" placeholder="Phone-Number"/>
+									<input type="text" class="form-control form-control-user" id="mem_phone" name ="mem_phone" placeholder="Phone-Number" autocomplete="off"/>
 									<div id = "phone_check"></div>
 								</div>
 								
 								<div class="form-group">
 									<label for ="mem_gender">성별</label>
-									<input type="checkbox"  id="mem_gender" name ="mem_gender" value = "남" placeholder="Gender">남
-									<input type="checkbox"  id="mem_gender" name ="mem_gender" value = "여" placeholder="Gender">여
+									<input type="checkbox"  name ="mem_gender" value = "남" placeholder="Gender">남
+									<input type="checkbox"  name ="mem_gender" value = "여" placeholder="Gender">여
 								</div>
-														
+																					
 								<button type = "submit" id = "accuontBtn" class="btn btn-primary btn-user btn-block">	Register Account </button>
 								<hr>
 							</form>
@@ -121,6 +122,14 @@
 	
 	$(document).ready(function(){
 		
+		let csrfHeaderName = "${_csrf.headerName}";
+		let csrfTokenValue = "${_csrf.token}";
+		
+		//Ajax spring security header....
+		$(document).ajaxSend(function(e, xhr, options) {
+			xhr.setRequestHeader(csrfHeaderName, csrfTokenValue);
+		});
+		
 		//정규식
 		let name = /^[가-힣]{2,4}|[a-zA-Z]{2,10}\s[a-zA-Z]{2,10}$/; // 한글 2~4자이내 (특수기호, 공백사용 불가)
 		let id = /^[A-Za-z]{1}[A-Za-z0-9]{3,19}$/; // 4~20자리, 첫글자 영문 또는 한글
@@ -135,8 +144,6 @@
 				$("#id_check").text("4~20자리, 첫글자 영문 또는 한글을 입력하세요.");
 				$("#id_check").css("color", "red");
 			} 						
-			
-
 			
 		}); 
 			
@@ -233,22 +240,22 @@
 				$("#mem_name").focus();
 				return false;
 				
+			} else if (id.test(($("#mem_id").val())) == "") {
+				alert("아이디를 입력해주세요.");
+					$("#mem_id").focus();
+					return false;
+			
 			} else if (pw.test(($("#mem_pw").val())) == "") {
 				alert("비밀번호를 입력해주세요.");
 				$("#mem_pw").focus();
-				return false;
-			
-			} else if (id.test(($("#mem_id").val())) == "") {
-					alert("아이디를 입력해주세요.");
-					$("#mem_id").focus();
-					return false;
+				return false;	
 			
 			} else if (phone.test(($("#mem_phone").val())) == "") {
 				alert("전화번호를 입력해주세요.");
 				$("#mem_phone").focus();
 				return false;
 	
-			} else if (birth.test(($("#mem_name").val())) == "") {
+			} else if ($("#mem_birth").val() == "") {
 				alert("생년월일을 입력해주세요.");
 				$("#mem_birth").focus();
 				return false;
@@ -266,13 +273,12 @@
 		$.ajax({
 			url : '/member/idCheck',
 			type : 'post',
-			dataType : "json",
+			dataType : 'json',
 			data : {id : id},
 			success : function(cnt) {
 				if(cnt != 1) {
 					$('.id_ok').css("display", "inline-block");
 					$('.id_already').css("display", "none");
-				console.log(id.length);
 					
 				} else {
 					$('.id_already').css("display", "inline-block");

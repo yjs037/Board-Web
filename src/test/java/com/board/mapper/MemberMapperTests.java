@@ -18,7 +18,7 @@ public class MemberMapperTests {
 
 	@Setter(onMethod_ = @Autowired)
 	private MemberMapper mapper;
-	
+
 	@Test
 	public void testRegister() {
 		MemberVO member = new MemberVO();
@@ -37,12 +37,36 @@ public class MemberMapperTests {
 	
 	@Test
 	public void testRead() {
-		MemberVO vo = mapper.read("user79");
+		MemberVO vo = mapper.read("test02");
 		
 		log.info(vo);
 		
 		vo.getAuthList().forEach(authVO -> log.info(authVO));
 	}
+	
+	@Test
+	public void testUpdate() {
+		
+		MemberVO vo = new MemberVO();
+		vo.setMem_name("유진수");
+		vo.setMem_pw("wlstn0307!");
+		vo.setMem_phone("01098764321");
+		vo.setMem_id("test01");
+		
+		log.info(vo);
+		
+		log.info("UPDATE COUNT : " + mapper.updateAccount(vo));
+		
+	}
+	
+	@Test
+	public void testDelete() {
+		
+		log.info("DELETE COUNT : " + mapper.deleteAccount("newID"));
+		
+	}
+
+	
 
 }
 

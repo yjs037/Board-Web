@@ -15,7 +15,7 @@ public class MemberServiceImpl implements MemberService {
 	
 	@Setter(onMethod_ = @Autowired)
 	private MemberMapper mapper;
-
+	
 	@Override
 	public void register(MemberVO vo) {
 		
@@ -24,14 +24,24 @@ public class MemberServiceImpl implements MemberService {
 		mapper.registerAccount(vo);
 	}
 
-	@Override
-	public void modify(MemberVO vo) {
 
+	@Override
+	public boolean updateAccount(MemberVO vo) {
+		
+		log.info("updateAccount..." + vo);
+		
+		return mapper.updateAccount(vo) == 1;
+		
 	}
 
-	@Override
-	public void delete(MemberVO vo) {
 
+	@Override
+	public boolean deleteAccount(String id) {
+			
+		log.info("deleteAccount..." + id);
+		
+		return mapper.deleteAccount(id) == 1;
+		
 	}
 	
 	@Override
@@ -46,7 +56,12 @@ public class MemberServiceImpl implements MemberService {
 		return mapper.passChk(vo);
 	}
 
-	
+
+	@Override
+	public MemberVO get(String id) {
+		
+		return mapper.read(id);
+	}
 
 	
 }

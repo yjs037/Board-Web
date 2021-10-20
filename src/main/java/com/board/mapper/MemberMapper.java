@@ -8,10 +8,10 @@ public interface MemberMapper {
 	public void registerAccount(MemberVO memberVo);
 	
 	//회원정보 수정
-	public void updateAccount(MemberVO meberVo);
-	
+	public int updateAccount(MemberVO meberVo);
+		
 	//회원 탈퇴
-	public void deleteAccount(MemberVO memberVo); 
+	public int deleteAccount(String id); 
 	
 	//아이디 중복체크
 	public int idCheck(String id);
@@ -20,7 +20,6 @@ public interface MemberMapper {
 	public int passChk(MemberVO memberVo);
 	
 	public MemberVO read(String id);
-	
 
 
 }

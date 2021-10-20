@@ -13,6 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.board.domain.BoardVO;
 import com.board.domain.Criteria;
+import com.board.domain.MemberVO;
 import com.board.domain.PageDTO;
 import com.board.service.BoardService;
 
@@ -28,7 +29,7 @@ public class BoardController {
 		private BoardService service;
 			
 		@GetMapping("/list")
-		public void list(Model model, Criteria cri) {
+		public void list(Model model, Criteria cri, MemberVO member) {
 			
 			log.info("list.....");
 			model.addAttribute("list", service.getList(cri));
